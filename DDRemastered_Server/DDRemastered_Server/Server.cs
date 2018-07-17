@@ -36,15 +36,17 @@ namespace DDRemastered_Server
                 Console.WriteLine(((IPEndPoint)newSocket.RemoteEndPoint).Address.ToString() + " connected");
 
                 Client newClient = new Client(newSocket, this);
+                newClient.Init();
                 characterSlots[1].Add(newClient);
                 new Thread(newClient.Start).Start();
             }
         }
 
-        public void ChangeClass(Client client, int index)
+        public void ChangeCharacter(Client client, int index)
         {
             lock (characterSlots)
             {
+                Broadcast(PacketMaker.MakeChCharacter(client.GetId(), (byte)index));
                 for (int i = 0; i < characterSlots.Length; i++)
                     if (characterSlots[i].Remove(client))
                         break;
@@ -62,9 +64,12 @@ namespace DDRemastered_Server
         public void RemovePlayer(Client client)
         {
             lock (characterSlots)
+            {
                 for (int i = 0; i < characterSlots.Length; i++)
                     if (characterSlots[i].Remove(client))
                         break;
+                Broadcast(PacketMaker.MakeDestroy(client.GetId()));
+            }
         }
 
         public void PlayerOK()
@@ -81,3 +86,4 @@ namespace DDRemastered_Server
         }
     }
 }
+        

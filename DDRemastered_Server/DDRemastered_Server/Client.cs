@@ -7,8 +7,12 @@ namespace DDRemastered_Server
 {
     class Client
     {
+        static private int currentId = 0;
+
+        private int id;
         private Socket socket;
         private bool gameStarted = false;
+        private String name;
         private bool isOK = false;
         private Server server;
 
@@ -16,6 +20,17 @@ namespace DDRemastered_Server
         {
             this.socket = socket;
             this.server = server;
+            id = currentId;
+            ++currentId;
+        }
+
+        public void Init()
+        {
+            byte[] buffer = new byte[256];
+            socket.Receive(buffer);
+            name = System.Text.Encoding.Default.GetString(buffer);
+            socket.Send(BitConverter.GetBytes(id));
+            server.Broadcast(PacketMaker.MakeInit(id, name));
         }
 
         public void Start()
@@ -39,7 +54,7 @@ namespace DDRemastered_Server
                         server.PlayerOK();
                     }
                     else
-                        server.ChangeClass(this, buffer[0]);
+                        server.ChangeCharacter(this, buffer[0]);
                 }
             }
             socket.Close();
@@ -59,6 +74,11 @@ namespace DDRemastered_Server
         public bool IsOK()
         {
             return isOK;
+        }
+
+        public int GetId()
+        {
+            return id;
         }
     }
 }
