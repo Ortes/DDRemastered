@@ -8,13 +8,12 @@ namespace DDRemastered_Server
 {
     class Server
     {
-        private int port;
+        private readonly int port;
         private List<Client>[] characterSlots;
 
         public Server(int port)
         {
             this.port = port;
-            nbPlayers = 0;
             characterSlots = new List<Client>[5];
             for (int i = 0; i < characterSlots.Length; i++)
                 characterSlots[i] = new List<Client>();
@@ -33,7 +32,10 @@ namespace DDRemastered_Server
 
             while (true)
             {
-                Client newClient = new Client(server.Accept(), this);
+                Socket newSocket = server.Accept();
+                Console.WriteLine(((IPEndPoint)newSocket.RemoteEndPoint).Address.ToString() + " connected");
+
+                Client newClient = new Client(newSocket, this);
                 characterSlots[1].Add(newClient);
                 new Thread(newClient.Start).Start();
             }
