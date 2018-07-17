@@ -7,7 +7,7 @@ namespace DDRemastered_Server
     {
         static void Main(string[] args)
         {
-            new Thread(new Server(65174).start).Start();
+            new Thread(new Server(65174).Start).Start();
         }
     }
 }

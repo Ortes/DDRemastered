@@ -9,34 +9,56 @@ namespace DDRemastered_Server
     {
         private Socket socket;
         private bool gameStarted = false;
-        private Mutex mutex = new Mutex();
+        private bool isOK = false;
+        private Server server;
 
-        public Client(Socket socket)
+        public Client(Socket socket, Server server)
         {
             this.socket = socket;
+            this.server = server;
         }
 
-        public void start()
+        public void Start()
         {
             byte[] buffer = new byte[1];
             while (!gameStarted)
             {
                 Thread.Sleep(100);
-                lock (mutex)
+                lock (socket)
                 {
                     if (socket.Poll(-1, SelectMode.SelectRead))
                         continue;
-                    socket.Receive(buffer);
+                    if (socket.Receive(buffer) == 0)
+                    {
+                        server.RemovePlayer(this);
+                        break;
+                    }
+                    if (buffer[0] == 0xFF)
+                    {
+                        isOK = true;
+                        server.PlayerOK();
+                    }
+                    else
+                        server.ChangeClass(this, buffer[0]);
                 }
             }
+            socket.Close();
         }
 
-        public void send()
+        public void Send(byte[] buffer)
         {
-            lock (mutex)
-            {
+            lock (socket)
+                socket.Send(buffer);
+        }
 
-            }
+        public void StartGame()
+        {
+            gameStarted = true;
+        }
+
+        public bool IsOK()
+        {
+            return isOK;
         }
     }
 }
