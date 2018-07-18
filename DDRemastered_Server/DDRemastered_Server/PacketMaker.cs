@@ -14,7 +14,7 @@ namespace DDRemastered_Server
 
         static public byte[] MakeInit(int id, String name)
         {
-            byte[] res = MakePacket(id, sizeof(int));
+            byte[] res = MakePacket(id, sizeof(int) + name.Length);
             BitConverter.GetBytes(name.Length).CopyTo(res, sizeof(int));
             Encoding.ASCII.GetBytes(name).CopyTo(res, sizeof(int) * 2);
             return res;

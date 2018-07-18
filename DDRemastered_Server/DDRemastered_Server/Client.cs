@@ -28,7 +28,8 @@ namespace DDRemastered_Server
         {
             byte[] buffer = new byte[256];
             socket.Receive(buffer);
-            name = System.Text.Encoding.Default.GetString(buffer);
+            int nameLength = BitConverter.ToInt32(buffer, 0);
+            name = System.Text.Encoding.ASCII.GetString(buffer, sizeof(int), nameLength);
             socket.Send(BitConverter.GetBytes(id));
             server.Broadcast(PacketMaker.MakeInit(id, name));
         }
