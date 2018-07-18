@@ -39,7 +39,7 @@ public class Board : MonoBehaviour
 
     void SpawnPlayer()
     {
-        GameObject playerObject = (GameObject)Instantiate(playerPrefab);
+        GameObject playerObject = Instantiate(playerPrefab);
         Player player = playerObject.AddComponent<Player>();
         playerObject.transform.parent = transform;
         playerObject.name = "Guigui";
