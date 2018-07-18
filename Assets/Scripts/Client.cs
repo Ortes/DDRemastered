@@ -10,6 +10,7 @@ using System.Threading;
 
 public class Client : MonoBehaviour {
 
+    public GameObject emptyMenu;
     public Text textEndPoint;
     public Text textName;
 
@@ -38,7 +39,9 @@ public class Client : MonoBehaviour {
         byte[] buffer = new byte[256];
         BitConverter.GetBytes(textName.text.Length).CopyTo(buffer, 0);
         System.Text.Encoding.ASCII.GetBytes(textName.text).CopyTo(buffer, sizeof(int));
-        // TODO : finish to sync name client and server  + dont send buffer to large
+        socket.Send(buffer, sizeof(int) + textName.text.Length, SocketFlags.None);
+        socket.Receive(buffer);
+        id = BitConverter.ToInt32(buffer, 0);
     }
 
     public void Run()
@@ -48,7 +51,7 @@ public class Client : MonoBehaviour {
 
         while (startGame)
         {
-            Thread.Sleep(100);
+            Thread.Sleep(50);
             lock (socket)
             {
                 if (socket.Poll(-1, SelectMode.SelectRead))
@@ -71,7 +74,7 @@ public class Client : MonoBehaviour {
         }
     }
 
-    static public byte[] MakePacket(int size)
+    public byte[] MakePacket(int size)
     {
         byte[] res = new byte[sizeof(int) + size];
         BitConverter.GetBytes(id).CopyTo(res, 0);

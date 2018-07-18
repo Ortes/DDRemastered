@@ -36,10 +36,10 @@ namespace DDRemastered_Server
 
         public void Start()
         {
-            byte[] buffer = new byte[1];
+            byte[] buffer = new byte[256];
             while (!gameStarted)
             {
-                Thread.Sleep(100);
+                Thread.Sleep(50);
                 lock (socket)
                 {
                     if (socket.Poll(-1, SelectMode.SelectRead))

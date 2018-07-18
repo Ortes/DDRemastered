@@ -25,7 +25,7 @@ public class Board : MonoBehaviour
             for (int j = 0; j < size; j++)
             {
 
-                GameObject tileObject = (GameObject)Instantiate(tilePrefab);
+                GameObject tileObject = Instantiate(tilePrefab);
                 Tile tile = tileObject.AddComponent<Tile>();
                 tileObject.transform.parent = transform;
                 tileObject.name = "Tile " + idTile;

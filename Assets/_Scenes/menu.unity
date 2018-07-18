@@ -723,7 +723,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.4, y: -0.3000002}
+  m_AnchoredPosition: {x: 0.40000153, y: -0.3000002}
   m_SizeDelta: {x: 615.8, y: 88.2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1409640507
@@ -864,7 +864,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0, y: -0.3000002}
+  m_AnchoredPosition: {x: 0, y: -0.3000002}
   m_SizeDelta: {x: 699.8, y: 88.22}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1596394422
@@ -1133,12 +1133,12 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1957248547}
-        m_MethodName: 
+      - m_Target: {fileID: 1957248548}
+        m_MethodName: Init
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -1189,7 +1189,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1901684795}
   m_Layer: 5
-  m_Name: GameObject
+  m_Name: MenuPlay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1243,6 +1243,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0abb17f279ab344584873ae4bee5a7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  emptyMenu: {fileID: 1901684794}
   textEndPoint: {fileID: 19531958}
   textName: {fileID: 1843470409}
 --- !u!4 &1957248549
