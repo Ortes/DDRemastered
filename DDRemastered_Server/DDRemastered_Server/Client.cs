@@ -42,20 +42,21 @@ namespace DDRemastered_Server
                 Thread.Sleep(50);
                 lock (socket)
                 {
-                    if (socket.Poll(-1, SelectMode.SelectRead))
+                    if (!socket.Poll(-1, SelectMode.SelectRead))
                         continue;
-                    if (socket.Receive(buffer) == 0)
+                    if (!socket.Connected)
                     {
                         server.RemovePlayer(this);
                         break;
                     }
+                    socket.Receive(buffer);
                     if (buffer[0] == 0xFF)
                     {
                         isOK = true;
                         server.PlayerOK();
                     }
                     else
-                        server.ChangeCharacter(this, buffer[0]);
+                        server.ChangeCharacter(this, buffer[sizeof(int)]);
                 }
             }
             socket.Close();

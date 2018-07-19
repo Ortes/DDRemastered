@@ -10,17 +10,20 @@ using System.Threading;
 
 public class Client : MonoBehaviour {
 
-    public GameObject emptyMenu;
+    public GameObject playMenu;
+    public GameObject characterMenu;
+    public GameObject textPlayer;
     public Text textEndPoint;
     public Text textName;
+    public Button[] charaters;
 
     private Socket socket;
     private int id;
-    private Dictionary<int, string> players = new Dictionary<int, string>();
+    private Dictionary<int, GameObject> players = new Dictionary<int, GameObject>();
 
     public bool Connect()
     {
-        string ipString = textEndPoint.text.Split(':')[0];
+        string ipString = textEndPoint.text;
         if (ipString == "" || textName.text == "")
             return false;
         IPAddress ipAddress;
@@ -28,10 +31,19 @@ public class Client : MonoBehaviour {
             return false;
         socket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
         socket.ReceiveTimeout = 1000;
-        socket.Connect(ipAddress, Int32.Parse(ipString));
+        socket.Connect(ipAddress, 65174);
         if (!socket.Connected)
             return false;
         return true;
+    }
+
+    public void Play()
+    {
+        if (!Connect())
+            return;
+        playMenu.SetActive(false);
+        characterMenu.SetActive(true);
+        new Thread(Run).Start();
     }
 
     public void Init()
@@ -46,15 +58,16 @@ public class Client : MonoBehaviour {
 
     public void Run()
     {
+        Init();
         byte[] buffer = new byte[256];
         bool startGame = false;
 
-        while (startGame)
+        while (!startGame)
         {
             Thread.Sleep(50);
             lock (socket)
             {
-                if (socket.Poll(-1, SelectMode.SelectRead))
+                if (!socket.Poll(-1, SelectMode.SelectRead))
                     continue;
 
                 socket.Receive(buffer);
@@ -62,16 +75,33 @@ public class Client : MonoBehaviour {
                 if (id == -1 && (startGame = true))
                     continue;
                 if (buffer[sizeof(int)] == 0xFF)
+                {
+                    Destroy(players[id]);
                     players.Remove(id);
-                string playerName = players[id];
-                if (playerName == null)
+                    continue;
+                }
+                GameObject player;
+                if (!players.TryGetValue(id, out player))
                 {
                     int nameLength = BitConverter.ToInt32(buffer, sizeof(int));
                     string newPlayerName = System.Text.Encoding.ASCII.GetString(buffer, 2 * sizeof(int), nameLength);
-                    players.Add(id, newPlayerName);
+                    GameObject newPlayer = Instantiate(textPlayer, charaters[1].transform.position, Quaternion.identity);
+                    newPlayer.GetComponent<Text>().text = newPlayerName;
+                    newPlayer.transform.Translate(new Vector3(0, id * .2f, 0));
+                    players.Add(id, newPlayer);
+                    continue;
                 }
+                player.transform.position = charaters[buffer[sizeof(int)]].transform.position;
+                player.transform.Translate(new Vector3(0, id * .2f, 0));
             }
         }
+    }
+
+    public void SendChoice(int choice)
+    {
+        byte[] buffer = MakePacket(sizeof(byte));
+        buffer[sizeof(int)] = (byte)choice;
+        socket.Send(buffer);
     }
 
     public byte[] MakePacket(int size)
