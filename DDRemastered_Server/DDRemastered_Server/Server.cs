@@ -42,6 +42,13 @@ namespace DDRemastered_Server
             }
         }
 
+        public void SendAllInit(Socket socket)
+        {
+            lock (characterSlots)
+                for (int i = 0; i < characterSlots.Length; i++)
+                    characterSlots[i].ForEach(x => { socket.Send(x.GetInitPacket()); socket.Send(x.GetCharacterPacket()); });
+        }
+
         public void ChangeCharacter(Client client, int index)
         {
             lock (characterSlots)
@@ -59,6 +66,13 @@ namespace DDRemastered_Server
             lock (characterSlots)
                 for (int i = 0; i < characterSlots.Length; i++)
                     characterSlots[i].ForEach(x => x.Send(buffer));
+        }
+
+        public void Broadcast(byte[] buffer, int size)
+        {
+            lock (characterSlots)
+                for (int i = 0; i < characterSlots.Length; i++)
+                    characterSlots[i].ForEach(x => x.Send(buffer, size));
         }
 
         public void RemovePlayer(Client client)

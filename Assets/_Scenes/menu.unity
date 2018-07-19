@@ -1953,10 +1953,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playMenu: {fileID: 1901684794}
   characterMenu: {fileID: 1014412061}
-  textPlayer: {fileID: 1942869811360286, guid: c44b0682798a9f445988579eb0676b28, type: 2}
+  textPlayer: {fileID: 1877169463892820, guid: c44b0682798a9f445988579eb0676b28, type: 2}
   textEndPoint: {fileID: 19531958}
   textName: {fileID: 1843470409}
-  charaters: []
+  canvas: {fileID: 222005290}
+  charaters:
+  - {fileID: 2119618885}
+  - {fileID: 1523620000}
+  - {fileID: 1446433428}
+  - {fileID: 1562788065}
+  - {fileID: 2142509700}
 --- !u!4 &1957248549
 Transform:
   m_ObjectHideFlags: 0

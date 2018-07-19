@@ -10,11 +10,12 @@ namespace DDRemastered_Server
         static private int currentId = 0;
 
         private int id;
+        private string name;
         private Socket socket;
         private bool gameStarted = false;
-        private String name;
         private bool isOK = false;
         private Server server;
+        private byte character = 1;
 
         public Client(Socket socket, Server server)
         {
@@ -26,12 +27,17 @@ namespace DDRemastered_Server
 
         public void Init()
         {
-            byte[] buffer = new byte[256];
-            socket.Receive(buffer);
-            int nameLength = BitConverter.ToInt32(buffer, 0);
-            name = System.Text.Encoding.ASCII.GetString(buffer, sizeof(int), nameLength);
             socket.Send(BitConverter.GetBytes(id));
-            server.Broadcast(PacketMaker.MakeInit(id, name));
+
+            byte[] buffer = new byte[256];
+            int size = socket.Receive(buffer);
+            Send(buffer, size);
+            server.Broadcast(buffer, size);
+            server.SendAllInit(socket);
+
+            int nameLength = BitConverter.ToInt32(buffer, sizeof(int));
+            name = System.Text.Encoding.ASCII.GetString(buffer, 2 * sizeof(int), nameLength);
+            Console.WriteLine("New player: " + name);
         }
 
         public void Start()
@@ -42,21 +48,29 @@ namespace DDRemastered_Server
                 Thread.Sleep(50);
                 lock (socket)
                 {
-                    if (!socket.Poll(-1, SelectMode.SelectRead))
+                    if (!socket.Poll(0, SelectMode.SelectRead))
                         continue;
-                    if (!socket.Connected)
+                    try
+                    {
+                        socket.Receive(buffer);
+                    }
+                    catch
                     {
                         server.RemovePlayer(this);
+                        Console.WriteLine("Player " + name + " disconnect from " + socket.RemoteEndPoint);
+                        socket.Close();
                         break;
                     }
-                    socket.Receive(buffer);
                     if (buffer[0] == 0xFF)
                     {
                         isOK = true;
                         server.PlayerOK();
                     }
                     else
+                    {
                         server.ChangeCharacter(this, buffer[sizeof(int)]);
+                        character = buffer[sizeof(int)];
+                    }
                 }
             }
             socket.Close();
@@ -66,6 +80,22 @@ namespace DDRemastered_Server
         {
             lock (socket)
                 socket.Send(buffer);
+        }
+
+        public void Send(byte[] buffer, int size)
+        {
+            lock (socket)
+                socket.Send(buffer, size, SocketFlags.None);
+        }
+
+        public byte[] GetInitPacket()
+        {
+            return PacketMaker.MakeInit(id, name);
+        }
+
+        public byte[] GetCharacterPacket()
+        {
+            return PacketMaker.MakeChCharacter(id, character);
         }
 
         public void StartGame()
