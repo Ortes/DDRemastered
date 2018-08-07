@@ -1,9 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
+using System.Net.Sockets;
 
 public class Game : MonoBehaviour {
 
+    public static Socket socket;
+    public static Dictionary<int, string> playersName;
 
 	// Use this for initialization
 	void Start () {

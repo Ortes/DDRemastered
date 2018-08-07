@@ -93,9 +93,8 @@ namespace DDRemastered_Server
                 for (int i = 0; i < characterSlots.Length; i++)
                     if (characterSlots[i].Exists(x => !x.IsOK()))
                         break;
-                byte[] buffer = new byte[1];
-                buffer[0] = 0xFF;
-                Broadcast(buffer);
+                Console.WriteLine("Game starting...");
+                Broadcast(PacketMaker.MakeReady());
             }
         }
     }

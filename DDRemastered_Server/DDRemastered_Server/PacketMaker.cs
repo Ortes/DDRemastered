@@ -12,6 +12,12 @@ namespace DDRemastered_Server
             return res;
         }
 
+        static public byte[] MakeReady()
+        {
+            byte[] res = MakePacket(-1, 0);
+            return res;
+        }
+
         static public byte[] MakeInit(int id, String name)
         {
             byte[] res = MakePacket(id, sizeof(int) + name.Length);

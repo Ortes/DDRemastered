@@ -77,7 +77,11 @@ public class Client : MonoBehaviour {
         int id = BitConverter.ToInt32(buffer, 0);
         if (id == -1)
         {
-            Debug.Log("start game");
+            Game.playersName = new Dictionary<int, string>();
+            foreach (var entry in players)
+                Game.playersName.Add(entry.Key, entry.Value.GetComponent<Text>().text);
+            Game.socket = socket;
+            SceneManager.LoadScene("scene", LoadSceneMode.Single);
             return;
         }
         GameObject player;

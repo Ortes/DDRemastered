@@ -61,13 +61,15 @@ namespace DDRemastered_Server
                         socket.Close();
                         break;
                     }
-                    if (buffer[0] == 0xFF)
+                    if (buffer[sizeof(int)] == 0xFF)
                     {
+                        Console.WriteLine("Player " + name + " is ready");
                         isOK = true;
                         server.PlayerOK();
                     }
                     else
                     {
+                        Console.WriteLine("Player " + name + " change character to " + sizeof(int));
                         server.ChangeCharacter(this, buffer[sizeof(int)]);
                         character = buffer[sizeof(int)];
                     }
