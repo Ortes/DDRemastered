@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Net;
 using UnityEngine.UI;
 using UnityEngine;
-using System.Threading;
+using UnityEngine.SceneManagement;
 
 
 public class Client : MonoBehaviour {
@@ -34,10 +33,8 @@ public class Client : MonoBehaviour {
     public bool Connect()
     {
         string ipString = textEndPoint.text;
-        if (ipString == "" || textName.text == "")
-            return false;
         IPAddress ipAddress;
-        if (!IPAddress.TryParse(ipString, out ipAddress))
+        if (ipString == "" || textName.text == "" || !IPAddress.TryParse(ipString, out ipAddress))
             return false;
         socket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
         socket.Connect(ipAddress, 65174);
@@ -72,46 +69,50 @@ public class Client : MonoBehaviour {
     {
         byte[] buffer = new byte[256];
 
-        lock (socket)
+        if (!socket.Poll(0, SelectMode.SelectRead))
+            return;
+        if (!socket.Connected)
+            SceneManager.LoadScene("menu", LoadSceneMode.Single);
+        socket.Receive(buffer, 4, SocketFlags.None);
+        int id = BitConverter.ToInt32(buffer, 0);
+        if (id == -1)
         {
-            if (!socket.Poll(0, SelectMode.SelectRead))
-                return;
-            if (!socket.Connected)
-                Application.LoadLevel("menu");
-            socket.Receive(buffer, 4, SocketFlags.None);
-            int id = BitConverter.ToInt32(buffer, 0);
-            if (id == -1)
-            {
-                Debug.Log("start game");
-                return;
-            }
-            GameObject player;
-            if (!players.TryGetValue(id, out player))
-            {
-                socket.Receive(buffer, 4, SocketFlags.None);
-                int nameLength = BitConverter.ToInt32(buffer, 0);
-                socket.Receive(buffer, nameLength, SocketFlags.None);
-                string newPlayerName = System.Text.Encoding.ASCII.GetString(buffer);
-                GameObject newPlayer = Instantiate(textPlayer, charaters[1].position, Quaternion.identity);
-                newPlayer.GetComponent<Text>().text = newPlayerName;
-                newPlayer.transform.SetParent(canvas.transform);
-                newPlayer.transform.localScale = charaters[1].localScale;
-                players.Add(id, newPlayer);
-                playersOrder.Add(newPlayer);
-                return;
-            }
-            socket.Receive(buffer, 1, SocketFlags.None);
-            if (buffer[0] == 0xFF)
-            {
-                Destroy(players[id]);
-                GameObject go = players[id];
-                playersOrder.Remove(go);
-                players.Remove(id);
-                return;
-            }
-            player.transform.position = charaters[buffer[0]].position;
-            player.transform.Translate(new Vector3(0, -(.3f + .3f * playersOrder.IndexOf(players[id])), 0));
+            Debug.Log("start game");
+            return;
         }
+        GameObject player;
+        if (!players.TryGetValue(id, out player))
+        {
+            socket.Receive(buffer, 4, SocketFlags.None);
+            int nameLength = BitConverter.ToInt32(buffer, 0);
+            socket.Receive(buffer, nameLength, SocketFlags.None);
+            string newPlayerName = System.Text.Encoding.ASCII.GetString(buffer);
+            GameObject newPlayer = Instantiate(textPlayer, charaters[1].position, Quaternion.identity);
+            newPlayer.GetComponent<Text>().text = newPlayerName;
+            newPlayer.transform.SetParent(canvas.transform);
+            newPlayer.transform.localScale = charaters[1].localScale;
+            players.Add(id, newPlayer);
+            playersOrder.Add(newPlayer);
+            return;
+        }
+        socket.Receive(buffer, 1, SocketFlags.None);
+        if (buffer[0] == 0xFF)
+        {
+            Destroy(players[id]);
+            GameObject go = players[id];
+            playersOrder.Remove(go);
+            players.Remove(id);
+            return;
+        }
+        player.transform.position = charaters[buffer[0]].position;
+        player.transform.Translate(new Vector3(0, -(.3f + .3f * playersOrder.IndexOf(players[id])), 0));
+    }
+
+    public void Ready()
+    {
+        byte[] buffer = MakePacket(sizeof(byte));
+        buffer[sizeof(int)] = 0xFF;
+        socket.Send(buffer);
     }
 
     public void SendChoice(int choice)

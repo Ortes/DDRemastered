@@ -9,7 +9,7 @@ namespace DDRemastered_Server
     {
         static private int currentId = 0;
 
-        private int id;
+        private readonly int id;
         private string name;
         private Socket socket;
         private bool gameStarted = false;
